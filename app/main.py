@@ -5,9 +5,9 @@ from fastapi import FastAPI, Depends, HTTPException
 from scalar_fastapi import get_scalar_api_reference
 from sqlmodel import Session
 from starlette import status
-from starlette.responses import HTMLResponse
 
-from app.database.session import get_session, create_db_and_tables, Air
+from app.database.models import Air
+from app.database.session import get_session, create_db_and_tables
 from app.schemas import AirRead, AirCreate
 
 
