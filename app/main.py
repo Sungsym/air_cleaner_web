@@ -1,13 +1,11 @@
 from contextlib import asynccontextmanager
 from datetime import datetime
 
-
-
-from sqlmodel import Session
+from sqlmodel import Session, select
 from starlette import status
 from scalar_fastapi import get_scalar_api_reference
 
-from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi import FastAPI, Depends, HTTPException, Request, Query
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -29,16 +27,27 @@ async def lifespan_handler(app: FastAPI):
     print('#' * 100)
 app = FastAPI(lifespan=lifespan_handler)
 
+@app.get("/air", response_model=list[AirRead])
+async def read_air(
+    start: str,
+    end: str | None = Query(description="截止日期", default=datetime.today().isoformat()),
+    session: Session = Depends(get_session)
+):
+    statement = select(Air).where(
+        Air.datetime >= start,
+        Air.datetime <= end
+    )
 
-@app.get("/air", response_model=AirRead)
-async def read_air(id: int, session: Session = Depends(get_session)):
-    air = await session.get(Air, id)
-    if air is None:
+    result = await session.execute(statement)
+    airs = result.scalars().all()
+
+    if not airs:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="这个数据不存在哦"
+            status_code=404,
+            detail="查询的数据不存在哦"
         )
-    return air
+
+    return airs
 
 @app.post("/air", response_model=AirRead)
 async def create_air(data: AirCreate, session: Session = Depends(get_session)):
