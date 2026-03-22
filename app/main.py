@@ -1,10 +1,16 @@
 from contextlib import asynccontextmanager
 from datetime import datetime
 
-from fastapi import FastAPI, Depends, HTTPException
-from scalar_fastapi import get_scalar_api_reference
+
+
 from sqlmodel import Session
 from starlette import status
+from scalar_fastapi import get_scalar_api_reference
+
+from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
 from app.database.models import Air
 from app.database.session import get_session, create_db_and_tables
@@ -16,26 +22,26 @@ async def lifespan_handler(app: FastAPI):
     print('#' * 100)
     print("服务器已启动")
     print('#' * 100)
-    create_db_and_tables()
+    await create_db_and_tables()
     yield
     print('#' * 100)
     print("服务器已关闭")
     print('#' * 100)
 app = FastAPI(lifespan=lifespan_handler)
 
+
 @app.get("/air", response_model=AirRead)
-def read_air(id: int, session: Session = Depends(get_session)):
-    air = session.get(Air, id)
+async def read_air(id: int, session: Session = Depends(get_session)):
+    air = await session.get(Air, id)
     if air is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="这个数据不存在哦"
         )
-
     return air
 
 @app.post("/air", response_model=AirRead)
-def create_air(data: AirCreate, session: Session = Depends(get_session)):
+async def create_air(data: AirCreate, session: Session = Depends(get_session)):
     data = {
         "datetime": datetime.now().isoformat(),
         **data.model_dump()
@@ -43,8 +49,8 @@ def create_air(data: AirCreate, session: Session = Depends(get_session)):
     new_air = Air(**data)
 
     session.add(new_air)
-    session.commit()
-    session.refresh(new_air)
+    await session.commit()
+    await session.refresh(new_air)
 
     return new_air
 
@@ -55,5 +61,11 @@ def get_scalar():
         # openapi_url=app.openapi_url,
         title="Scalar API",
     )
+
+
+
+
+
+
 
 # taskkill /IM python.exe /F

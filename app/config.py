@@ -6,8 +6,8 @@ class DatabaseSetting(BaseSettings):
 
     # 让它直接读取同名的环境变量（Vercel 中已设置）
     model_config = SettingsConfigDict(
-        # env_prefix="",          # vercel
-        env_file=".env",       # 本地
+        env_prefix="",          # vercel
+        # env_file=".env",       # 本地
         case_sensitive=True,   # 大小写敏感
         env_ignore_empty = True,
         extra = "ignore",
