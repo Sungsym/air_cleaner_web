@@ -9,6 +9,7 @@ from fastapi import FastAPI, Depends, HTTPException, Request, Query
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.cors import CORSMiddleware
 
 from app.database.models import Air
 from app.database.session import get_session, create_db_and_tables
@@ -26,6 +27,15 @@ async def lifespan_handler(app: FastAPI):
     print("服务器已关闭")
     print('#' * 100)
 app = FastAPI(lifespan=lifespan_handler)
+
+# 允许跨域访问
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],          # ⭐ 开发用 *，生产可以换成你的 Hugo 站域名
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/air", response_model=list[AirRead])
 async def read_air(
