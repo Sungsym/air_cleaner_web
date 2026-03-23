@@ -43,9 +43,22 @@ async def read_air(
     end: str | None = Query(description="截止日期", default=datetime.today().isoformat()),
     session: Session = Depends(get_session)
 ):
+    start_dt = datetime.fromisoformat(start)
+    end_dt = datetime.fromisoformat(end)
+    days = (end_dt - start_dt).days
+    if days <= 1:
+        step = 2
+    elif days <= 7:
+        step = 14
+    elif days <= 30:
+        step = 60
+    else:
+        step = 100
+
     statement = select(Air).where(
         Air.datetime >= start,
-        Air.datetime <= end
+        Air.datetime <= end,
+        Air.id % step == 0
     )
 
     result = await session.execute(statement)
