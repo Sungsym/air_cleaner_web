@@ -56,6 +56,7 @@ async def read_air(
     statement = select(Air).where(
         Air.datetime >= start,
         Air.datetime <= end,
+        Air.TVOC != -1,
         Air.id % step == 0
     )
 
