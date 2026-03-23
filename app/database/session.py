@@ -4,7 +4,7 @@ from sqlmodel import SQLModel, Session
 from app.config import settings
 
 
-db_url = settings.POSTGRES_URL
+db_url = settings.POSTGRES_URL_PRODUCTION
 engine = create_async_engine(db_url, echo=True)
 
 # 异步创建表

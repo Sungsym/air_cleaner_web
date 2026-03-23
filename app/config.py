@@ -3,6 +3,7 @@ from pydantic_settings import SettingsConfigDict, BaseSettings
 
 class DatabaseSetting(BaseSettings):
     POSTGRES_URL: str
+    POSTGRES_URL_PRODUCTION: str
 
     # 让它直接读取同名的环境变量（Vercel 中已设置）
     model_config = SettingsConfigDict(
