@@ -50,7 +50,7 @@ async def read_air(
     )
     total = (await session.execute(count_stmt)).scalar()
 
-    target_points = 10
+    target_points = 12
     step = max(1, total // target_points)
 
     statement = select(Air).where(
